@@ -2,17 +2,26 @@ import os
 import socket
 import threading
 import pyaudio
+import argparse
 from loguru import logger
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, DirCreatedEvent, FileCreatedEvent
 
+parser = argparse.ArgumentParser(description="AudioCast Streaming Server")
+parser.add_argument("--host", default="0.0.0.0", help="Server Hostname (Default: 0.0.0.0)")
+parser.add_argument("--port", type=int, default=12345, help="Server Port (Default: 12345)")
+parser.add_argument("--watchdog-folder", default="../rfa", help="Folder to monitor for .rfa files")
+parser.add_argument("--audio-files", default="../wav-files", help="Folder where .wav files are stored")
+
+args = parser.parse_args()
+
 # Folder to monitor
-WATCHDOG_FOLDER = './rfa'
-AUDIO_FILES_FOLDER = './wav_files'
+WATCHDOG_FOLDER = args.watchdog_folder
+AUDIO_FILES_FOLDER = args.audio_files
 
 # Server settings
-HOST = '0.0.0.0'
-PORT = 12345
+HOST = args.host
+PORT = args.port
 
 # pyAudio settings
 CHUNK_SIZE = 1024

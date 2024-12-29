@@ -1,10 +1,16 @@
 import socket
 import pyaudio
 from loguru import logger
+import argparse
+
+parser = argparse.ArgumentParser(description="AudioCast Streaming Client")
+parser.add_argument("--host", default='127.0.0.1', help="Server Hostname (Default: 127.0.0.1)")
+parser.add_argument("--port", type=int, default=12345, help="Server Port (Default: 12345)")
+args = parser.parse_args()
 
 # Server settings
-HOST = "localhost"
-PORT = 12345
+HOST = args.host
+PORT = args.port
 
 # PyAudio settings
 CHUNK_SIZE = 1024
