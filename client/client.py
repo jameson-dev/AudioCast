@@ -41,8 +41,10 @@ def stream_audio():
             if not data:
                 break
             stream.write(data)
+    except ConnectionRefusedError:
+        logger.exception(f"Unable to connect to server at {HOST}:{PORT}. (Server already running?)")
     except KeyboardInterrupt:
-        logger.info(f"Streaming stopped")
+        logger.info(f"Streaming stopped by user")
 
     finally:
         client_socket.close()
