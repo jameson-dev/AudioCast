@@ -1,4 +1,5 @@
 import os
+import re
 import socket
 import threading
 import pyaudio
@@ -57,7 +58,20 @@ class FileHandler(FileSystemEventHandler):
 
     def handle_rfa_file(self, rfa_file_path):
         base_name = os.path.splitext(os.path.basename(rfa_file_path))[0]
-        audio_file_path = os.path.join(AUDIO_FILES_FOLDER, f"{base_name}.wav")
+
+        # Extract the meaningful part of the filename (before the timestamp and ID)
+        match = re.match(r"(.+?)_\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z_\d+", base_name)
+        if not match:
+            logger.error(f"Filename format is unrecognized: {base_name}")
+            return
+
+        keyword_part = match.group(1)  # Extract the part before the timestamp
+        normalized_keyword = keyword_part.replace("_", " ").lower().strip()
+
+        # Replace spaces with underscores for .wav file matching
+        wav_file_name = normalized_keyword.replace(" ", "_") + ".wav"
+
+        audio_file_path = os.path.join(AUDIO_FILES_FOLDER, wav_file_name)
 
         if os.path.exists(audio_file_path):
             logger.debug(f"Found audio file {audio_file_path}")
