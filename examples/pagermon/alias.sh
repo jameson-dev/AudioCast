@@ -28,6 +28,9 @@ if [[ $? -eq 0 ]]; then
     ID=$(echo "$DATA" | grep -o '"id":"[^"]*"' | sed 's/"id":"\(.*\)"/\1/')
     TIMESTAMP=$(echo "$DATA" | grep -o '"timestamp":"[^"]*"' | sed 's/"timestamp":"\(.*\)"/\1/')
 
+    # Replace colons in the timestamp to avoid invalid characters in the filename
+    TIMESTAMP=$(echo "$TIMESTAMP" | sed 's/:/_/g')
+
     # Create a timestamped file named after the matched keyword
     FILENAME="$OUTPUT_DIR/${MATCHED_KEYWORD// /_}_${TIMESTAMP:-unknown}_${ID:-unknown}.rfa"
 
