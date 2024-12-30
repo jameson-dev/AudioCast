@@ -10,8 +10,8 @@ from watchdog.events import FileSystemEventHandler, DirCreatedEvent, FileCreated
 parser = argparse.ArgumentParser(description="AudioCast Streaming Server")
 parser.add_argument("--host", default="0.0.0.0", help="Server Hostname (Default: 0.0.0.0)")
 parser.add_argument("--port", type=int, default=12345, help="Server Port (Default: 12345)")
-parser.add_argument("--watchdog-folder", default="../rfa", help="Folder to monitor for .rfa files")
-parser.add_argument("--audio-files", default="../wav-files", help="Folder where .wav files are stored")
+parser.add_argument("--watchdog-folder", default="rfa", help="Folder to monitor for .rfa files")
+parser.add_argument("--audio-files", default="wav-files", help="Folder where .wav files are stored")
 
 args = parser.parse_args()
 
