@@ -107,9 +107,10 @@ class AudioServer:
         try:
             while True:
                 # Keep connection alive
+                client_socket.recv(1024) # Check for data/activity
                 pass
-        except:
-            logger.info(f"Client {client_address} disconnected")
+        except (ConnectionRefusedError, BrokenPipeError):
+            logger.warning(f"Client {client_address} disconnected unexpectedly")
             self.clients.remove(client_socket)
             client_socket.close()
 
