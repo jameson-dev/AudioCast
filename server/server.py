@@ -3,11 +3,13 @@ import re
 import socket
 import threading
 import pyaudio
+import signal
 from pathlib import Path
 import argparse
 from loguru import logger
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, DirCreatedEvent, FileCreatedEvent
+from concurrent.futures import ThreadPoolExecutor
 
 parser = argparse.ArgumentParser(description="AudioCast Streaming Server")
 parser.add_argument("--host", default="0.0.0.0", help="Server Hostname (Default: 0.0.0.0)")
@@ -33,6 +35,8 @@ RATE = 44100
 
 # pyAudio instance
 p = pyaudio.PyAudio()
+
+shutdown_event = threading.Event()
 
 
 def check_dirs(dir_path):
@@ -82,20 +86,26 @@ class FileHandler(FileSystemEventHandler):
             logger.error(f"Error: Audio file '{audio_file_path}' not found.")
 
     def stream_audio(self, file_path):
-        with open(file_path, 'rb') as audio_file:
-            while chunk := audio_file.read(CHUNK_SIZE):
-                # Send chunks of audio to all connected clients
-                self.server.broadcast_audio(chunk)
+        try:
+            with open(file_path, 'rb') as audio_file:
+                while chunk := audio_file.read(CHUNK_SIZE):
+                    # Send chunks of audio to all connected clients
+                    self.server.broadcast_audio(chunk)
+        except FileNotFoundError:
+            logger.error(f"Audio file not found: {file_path}")
 
 
 class AudioServer:
-    def __init__(self, host, port):
+    def __init__(self, host, port, max_workers=10):
         self.host = host
         self.port = port
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.bind((host, port))
         self.server_socket.listen(5)
         self.clients = []
+
+        # Initialise thread pool
+        self.executor = ThreadPoolExecutor(max_workers=max_workers)
 
         self.observer = Observer()
         self.event_handler = FileHandler(self)
@@ -124,20 +134,62 @@ class AudioServer:
 
     def start(self):
         logger.info(f"Server listening on {self.host}:{self.port}")
-        while True:
-            client_socket, client_address = self.server_socket.accept()
-            threading.Thread(target=self.handle_client, args=(client_socket, client_address)).start()
+        try:
+            while not shutdown_event.is_set():
+                self.server_socket.settimeout(1.0) #Non-blocking accept with timeout
+                try:
+                    client_socket, client_address = self.server_socket.accept()
+                    self.executor.submit(self.handle_client, client_socket, client_address)
+                except socket.timeout:
+                    continue
+        finally:
+            self.shutdown()
+
+    def shutdown(self):
+        logger.info(f"Shutting down server...")
+        shutdown_event.set()
+
+        # Stop accepting new connections
+        self.server_socket.close()
+
+        # Stop all threads in the thread pool
+        self.executor.shutdown(wait=True)
+
+        # Stop folder monitoring
+        self.observer.stop()
+        self.observer.join()
+
+        # Close all connected clients
+        for client_socket in self.clients:
+            client_socket.close()
+
+        logger.info(f"Server shutdown complete.")
 
     def start_folder_monitor(self):
         self.observer.start()
 
 
+def signal_handler(signum, frame):
+    logger.info(f"Signal {signum} received. Initiating shutdown...")
+    shutdown_event.set()
+
+
 def main():
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+
     check_dirs(WATCHDOG_FOLDER)
     check_dirs(AUDIO_FILES_FOLDER)
+
     server = AudioServer(HOST, PORT)
     server.start_folder_monitor()
-    server.start()
+
+    try:
+        server.start()
+    except Exception as e:
+        logger.error(f"Server encountered an error: {e}")
+    finally:
+        server.shutdown()
 
 
 if __name__ == "__main__":
