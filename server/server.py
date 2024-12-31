@@ -3,6 +3,7 @@ import re
 import socket
 import threading
 import pyaudio
+from pathlib import Path
 import argparse
 from loguru import logger
 from watchdog.observers import Observer
@@ -17,8 +18,8 @@ parser.add_argument("--audio-files", default="wav-files", help="Folder where .wa
 args = parser.parse_args()
 
 # Folder to monitor
-WATCHDOG_FOLDER = args.watchdog_folder
-AUDIO_FILES_FOLDER = args.audio_files
+WATCHDOG_FOLDER = Path(args.watchdog_folder)
+AUDIO_FILES_FOLDER = Path(args.audio_files)
 
 # Server settings
 HOST = args.host
