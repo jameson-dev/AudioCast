@@ -136,7 +136,8 @@ class AudioServer:
         logger.info(f"Server listening on {self.host}:{self.port}")
         try:
             while not shutdown_event.is_set():
-                self.server_socket.settimeout(1.0) #Non-blocking accept with timeout
+                # Non-blocking accept with timeout
+                self.server_socket.settimeout(1.0)
                 try:
                     client_socket, client_address = self.server_socket.accept()
                     self.executor.submit(self.handle_client, client_socket, client_address)
