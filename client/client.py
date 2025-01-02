@@ -35,30 +35,6 @@ shutdown_event = threading.Event()
 p = pyaudio.PyAudio()
 
 
-    while not shutdown_event.is_set():
-        try:
-            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            client_socket.connect((HOST, PORT))
-            logger.info(f"Connected to server at {HOST}:{PORT}")
-            connection_status.set("Connected")
-            return client_socket
-        except ConnectionRefusedError:
-            logger.warning(f"Connection refused. Retrying in {RETRY_DELAY} seconds...")
-            connection_status.set("Disconnected")
-            time.sleep(RETRY_DELAY)
-
-
-def stream_audio():
-    # Open a stream for playback
-    stream = p.open(format=FORMAT,
-                    channels=CHANNELS,
-                    rate=RATE,
-                    output=True,
-                    frames_per_buffer=CHUNK_SIZE)
-
-    client_socket = connect_to_server()
-
-    try:
 class AudioCastClient:
     def __init__(self, host, port, retry_delay, heartbeat_enabled):
         self.host = host

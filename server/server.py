@@ -105,9 +105,6 @@ class AudioServer:
         self.server_socket.bind((host, port))
         self.server_socket.listen(5)
         self.clients = []
-
-        # Initialise thread pool
-        self.executor = ThreadPoolExecutor(max_workers=max_workers)
         self.client_status = {}
         self.broadcast_paused = False
         self.heartbeat_interval = 5
