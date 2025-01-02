@@ -148,7 +148,7 @@ class AudioCastClient:
                 stream.write(data)
 
             except socket.timeout:
-                logger.debug("Socket timeout occurred; likely no data received during pause.")
+                logger.debug("An expected socket timeout occurred; likely no data received sent to server")
                 continue
             except socket.error as e:
                 logger.error(f"Socket error: {e}")
