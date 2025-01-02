@@ -2,6 +2,8 @@ import os
 import re
 import socket
 import threading
+import time
+
 import pyaudio
 import signal
 from pathlib import Path
@@ -106,23 +108,45 @@ class AudioServer:
 
         # Initialise thread pool
         self.executor = ThreadPoolExecutor(max_workers=max_workers)
+        self.client_status = {}
+        self.broadcast_paused = False
+        self.heartbeat_interval = 5
 
         self.observer = Observer()
         self.event_handler = FileHandler(self)
         self.observer.schedule(self.event_handler, WATCHDOG_FOLDER, recursive=False)
 
+        # Initialise thread pool
+        self.executor = ThreadPoolExecutor(max_workers=max_workers)
+
     def handle_client(self, client_socket, client_address):
         logger.info(f"New client connected: {client_address}")
         self.clients.append(client_socket)
+
         try:
             while True:
-                # Keep connection alive
-                client_socket.recv(1024) # Check for data/activity
-                pass
-        except (ConnectionRefusedError, BrokenPipeError):
-            logger.warning(f"Client {client_address} disconnected unexpectedly")
-            self.clients.remove(client_socket)
+                data = client_socket.recv(1024).decode().strip()
+                if not data:
+                    logger.warning(f"Client {client_address} disconnected due to no data.")
+                    break
+
+                if data == "PAUSE":
+                    self.broadcast_paused = True
+                    self.broadcast_control_message("PAUSED")
+                    logger.info("Broadcast paused by a client.")
+                elif data == "RESUME":
+                    self.broadcast_paused = False
+                    self.broadcast_control_message("RESUMED")
+                    logger.info("Broadcast resumed by a client.")
+                else:
+                    logger.warning(f"Unknown command from client {client_address}: {data}")
+        except Exception as e:
+            logger.warning(f"Error handling client {client_address}: {e}")
+        finally:
+            if client_socket in self.clients:
+                self.clients.remove(client_socket)
             client_socket.close()
+            logger.info(f"Client {client_address} has been removed from the client list.")
 
     def broadcast_audio(self, chunk):
         for client_socket in self.clients:
@@ -131,6 +155,20 @@ class AudioServer:
             except:
                 self.clients.remove(client_socket)
                 client_socket.close()
+
+    def broadcast_control_message(self, message):
+        control_message = f"CONTROL:{message}".encode()
+        for client_socket in self.clients:
+            try:
+                client_socket.sendall(control_message)
+            except:
+                self.clients.remove(client_socket)
+                client_socket.close()
+
+    def start_heartbeat(self):
+        while not shutdown_event.is_set():
+            time.sleep(5)  # Heartbeat interval
+            self.broadcast_control_message("HEARTBEAT")
 
     def start(self):
         logger.info(f"Server listening on {self.host}:{self.port}")
