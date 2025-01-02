@@ -89,6 +89,7 @@ class AudioCastClient:
             except (socket.error, OSError) as e:
                 logger.error(f"Error in connect_to_server: {e}")
                 self.connection_status.set("Disconnected")
+                self.broadcast_status.set("Not connected")
                 time.sleep(self.retry_delay)
 
         logger.debug("Exiting connect_to_server due to shutdown event.")
@@ -198,6 +199,18 @@ class AudioCastClient:
         root = Tk()
         root.title("AudioCast Client")
         root.geometry("300x200")
+        root.resizable(False, False)
+
+        # Calculate the position for the bottom-right corner
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+        window_width = 300
+        window_height = 200
+        position_x = screen_width - window_width - 10  # 10px margin from the edge
+        position_y = screen_height - window_height - 100  # 100px margin from the taskbar
+
+        # Set the position
+        root.geometry(f"{window_width}x{window_height}+{position_x}+{position_y}")
 
         self.connection_status = StringVar()
         self.connection_status.set("Disconnected")
