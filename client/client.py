@@ -130,12 +130,12 @@ class AudioCastClient:
                     control_message = data.decode().split(":", 1)[1]
                     if control_message == "PAUSED":
                         logger.info("Broadcast is paused by the server.")
-                        self.connection_status.set("Paused")
+                        self.connection_status.set("Connected | Paused")
                         self.update_pause_button("Resume broadcasts")
                         paused_event.set()
                     elif control_message == "RESUMED":
                         logger.info("Broadcast is resumed by the server.")
-                        self.connection_status.set("Connected")
+                        self.connection_status.set("Connected | Broadcasting")
                         self.update_pause_button("Pause broadcasts")
                         paused_event.clear()
                     continue
