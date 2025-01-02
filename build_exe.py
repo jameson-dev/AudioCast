@@ -5,7 +5,7 @@ import os
 
 def create_exe():
     # Path to your main Python file
-    main_script = "your_main_script.py"
+    main_script = "client/client.py"
 
     # Define the PyInstaller command
     command = [
