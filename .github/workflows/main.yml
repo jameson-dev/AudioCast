@@ -40,6 +40,17 @@ jobs:
       - name: Install Inno Setup
         run: |
           choco install innosetup -y  # Install Inno Setup using Chocolatey
+          # Check if Inno Setup was installed in the expected paths
+          if (Test-Path "C:\Program Files (x86)\Inno Setup 6\ISCC.exe") {
+            echo "Inno Setup installed at C:\Program Files (x86)\Inno Setup 6"
+            echo "INNO_SETUP_PATH='C:\Program Files (x86)\Inno Setup 6\ISCC.exe'" >> $GITHUB_ENV
+          } elseif (Test-Path "C:\Program Files\Inno Setup 6\ISCC.exe") {
+            echo "Inno Setup installed at C:\Program Files\Inno Setup 6"
+            echo "INNO_SETUP_PATH='C:\Program Files\Inno Setup 6\ISCC.exe'" >> $GITHUB_ENV
+          } else {
+            echo "Inno Setup not found!"
+            exit 1
+          }
 
       # Step 7: Set Inno Setup executable path dynamically
       - name: Set Inno Setup executable path
@@ -52,8 +63,7 @@ jobs:
       # Step 8: Create Installer with Inno Setup
       - name: Create Inno Setup Installer
         run: |
-          $INNO_SETUP_PATH = $Env:INNO_SETUP_PATH
-          & $INNO_SETUP_PATH installer.iss  # Use the Inno Setup executable from the dynamic path
+          & $Env:INNO_SETUP_PATH "installer.iss"
 
       # Step 9: Upload Client EXE as Artifact
       - name: Upload Client EXE as Artifact
