@@ -1,4 +1,4 @@
-name: Build EXE
+name: Build EXE and Package with Inno Setup
 
 on:
   push:
@@ -8,36 +8,61 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+
     steps:
+      # Step 1: Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      # Step 2: Set up Python environment
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
 
+      # Step 3: Install Python dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # Step 4: Build Client EXE with PyInstaller
       - name: Build Client EXE with build_exe.py
         run: |
           python build_exe.py client/client.py  # Build client executable
 
+      # Step 5: Build Server EXE with PyInstaller
       - name: Build Server EXE with build_exe.py
         run: |
           python build_exe.py server/server.py  # Build server executable
 
+      # Step 6: Install Inno Setup
+      - name: Install Inno Setup
+        run: |
+          choco install innosetup  # Install Inno Setup using Chocolatey
+
+      # Step 7: Create Installer with Inno Setup
+      - name: Create Inno Setup Installer
+        run: |
+          inno setup installer.iss  # Compile the installer script with Inno Setup
+
+      # Step 8: Upload Client EXE as Artifact
       - name: Upload Client EXE as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: AudioCast-Client
           path: dist/client.exe  # Path to client EXE
 
+      # Step 9: Upload Server EXE as Artifact
       - name: Upload Server EXE as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: AudioCast-Server
           path: dist/server.exe  # Path to server EXE
+
+      # Step 10: Upload Installer as Artifact
+      - name: Upload Installer as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AudioCast-Installer
+          path: Output/AudioCast_Installer.exe  # Path to the generated installer
