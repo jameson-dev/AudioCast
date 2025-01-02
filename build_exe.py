@@ -5,15 +5,26 @@ import os
 
 def create_exe(script_name):
     # Define the PyInstaller command
-    command = [
-        'pyinstaller',
-        '--onefile',  # Single executable file
-        '--windowed',  # Hide the console window (for GUI apps)
-        script_name
-    ]
+    if "server.py" in script_name:
+        command = [
+            'pyinstaller',
+            '--onefile',  # Single executable file
+            '--windowed',  # Hide the console window (for GUI apps)
+            script_name
+        ]
 
-    # Run PyInstaller command
-    subprocess.check_call(command)
+        # Run PyInstaller command
+        subprocess.check_call(command)
+    elif "client.py" in script_name:
+        command = [
+            'pyinstaller',
+            '--onefile',  # Single executable file
+            '--windowed',  # Hide the console window (for GUI apps)
+            script_name
+        ]
+
+        # Run PyInstaller command
+        subprocess.check_call(command)
 
 
 if __name__ == '__main__':
