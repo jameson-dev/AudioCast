@@ -38,7 +38,7 @@ jobs:
       # Step 7: Create Installer with Inno Setup
       - name: Create Inno Setup Installer
         run: |
-          & "D:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
           
       # Step 8: Upload Client EXE as Artifact
       - name: Upload Client EXE as Artifact
