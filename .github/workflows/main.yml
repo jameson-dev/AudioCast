@@ -22,12 +22,22 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Build EXE with PyInstaller
+      - name: Build Client EXE with build_exe.py
         run: |
-          python build_exe.py
-          
-      - name: Upload EXE as Artifact
+          python build_exe.py client/client.py  # Build client executable
+
+      - name: Build Server EXE with build_exe.py
+        run: |
+          python build_exe.py server/server.py  # Build server executable
+
+      - name: Upload Client EXE as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: AudioCast-Client
-          path: dist/*
+          path: dist/client.exe  # Path to client EXE
+
+      - name: Upload Server EXE as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AudioCast-Server
+          path: dist/server.exe  # Path to server EXE
