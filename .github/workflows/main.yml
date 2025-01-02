@@ -2,13 +2,10 @@ name: Build EXE and Package with Inno Setup
 
 on:
   push:
-    branches:
-      - main
-
+@@ -8,36 +8,61 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-
     steps:
       # Step 1: Checkout repository
       - name: Checkout repository
@@ -25,61 +22,37 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
       # Step 4: Build Client EXE with PyInstaller
       - name: Build Client EXE with build_exe.py
         run: |
           python build_exe.py client/client.py  # Build client executable
-
       # Step 5: Build Server EXE with PyInstaller
       - name: Build Server EXE with build_exe.py
         run: |
           python build_exe.py server/server.py  # Build server executable
-
-      # Step 6: Install Inno Setup using Chocolatey
+      # Step 6: Install Inno Setup
       - name: Install Inno Setup
         run: |
-          choco install innosetup -y  # Install Inno Setup using Chocolatey
-          # Verify Inno Setup installation
-          if (Test-Path "C:\Program Files (x86)\Inno Setup 6\ISCC.exe") {
-            echo "Inno Setup installed at C:\Program Files (x86)\Inno Setup 6"
-            echo "INNO_SETUP_PATH='C:\Program Files (x86)\Inno Setup 6\ISCC.exe'" >> $GITHUB_ENV
-          } elseif (Test-Path "C:\Program Files\Inno Setup 6\ISCC.exe") {
-            echo "Inno Setup installed at C:\Program Files\Inno Setup 6"
-            echo "INNO_SETUP_PATH='C:\Program Files\Inno Setup 6\ISCC.exe'" >> $GITHUB_ENV
-          } else {
-            echo "Inno Setup not found!"
-            exit 1
-          }
-
-      - name: Build Installer
-        run: |
-          # Explicitly call the Inno Setup executable with quotes for paths
-          $innoSetupPath = $Env:INNO_SETUP_PATH
-          $installerScript = "installer.iss"
-          Write-Host "Building installer with: $innoSetupPath $installerScript"
-          & "$innoSetupPath" "$installerScript"
-          
-      # Step 8: Create Installer with Inno Setup
+          choco install innosetup  # Install Inno Setup using Chocolatey
+          $innoSetupPath = "D:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+      # Step 7: Create Installer with Inno Setup
       - name: Create Inno Setup Installer
         run: |
-          & $Env:INNO_SETUP_PATH "installer.iss"
-
-      # Step 9: Upload Client EXE as Artifact
+          & "$innoSetupPath" "installer.iss"  # Compile the installer script with Inno Setup
+      # Step 8: Upload Client EXE as Artifact
       - name: Upload Client EXE as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: AudioCast-Client
           path: dist/client.exe  # Path to client EXE
 
-      # Step 10: Upload Server EXE as Artifact
+      # Step 9: Upload Server EXE as Artifact
       - name: Upload Server EXE as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: AudioCast-Server
           path: dist/server.exe  # Path to server EXE
-
-      # Step 11: Upload Installer as Artifact
+      # Step 10: Upload Installer as Artifact
       - name: Upload Installer as Artifact
         uses: actions/upload-artifact@v4
         with:
