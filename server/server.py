@@ -65,7 +65,7 @@ class FileHandler(FileSystemEventHandler):
         base_name = os.path.splitext(os.path.basename(rfa_file_path))[0]
 
         # Extract the meaningful part of the filename (before the timestamp and ID)
-        match = re.match(r"([a-zA-Z0-9_]+)_(\d{4}-\d{2}-\d{2}T\d{2}_\d{2}_\d{2}Z)_.*", base_name)
+        match = re.match(r"([a-zA-Z0-9_]+)_.*", base_name)
         if not match:
             logger.error(f"Filename format is unrecognized: {base_name}")
             return
