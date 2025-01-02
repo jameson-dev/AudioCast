@@ -34,13 +34,11 @@ jobs:
       - name: Install Inno Setup
         run: |
           choco install innosetup  # Install Inno Setup using Chocolatey
-          $innoSetupPath = "D:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+
       # Step 7: Create Installer with Inno Setup
       - name: Create Inno Setup Installer
         run: |
-          pwsh -Command "& '$innoSetupPath' 'installer.iss'"
-        env:
-          innoSetupPath: 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe'
+          & "D:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
           
       # Step 8: Upload Client EXE as Artifact
       - name: Upload Client EXE as Artifact
