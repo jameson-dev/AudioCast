@@ -3,16 +3,13 @@ import sys
 import os
 
 
-def create_exe():
-    # Path to your main Python file
-    main_script = "client/client.py"
-
+def create_exe(script_name):
     # Define the PyInstaller command
     command = [
         'pyinstaller',
-        '--onefile',           # Single executable file
-        '--windowed',          # Hide the console window (for GUI apps)
-        main_script
+        '--onefile',  # Single executable file
+        '--windowed',  # Hide the console window (for GUI apps)
+        script_name
     ]
 
     # Run PyInstaller command
@@ -20,4 +17,15 @@ def create_exe():
 
 
 if __name__ == '__main__':
-    create_exe()
+    # First argument is the script to convert into an EXE
+    if len(sys.argv) < 2:
+        print("Please provide the script name (client.py or server.py)")
+        sys.exit(1)
+
+    script_file = sys.argv[1]
+
+    if not os.path.exists(script_file):
+        print(f"The file {script_file} does not exist.")
+        sys.exit(1)
+
+    create_exe(script_file)
