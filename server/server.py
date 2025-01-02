@@ -120,6 +120,10 @@ class AudioServer:
         logger.info(f"New client connected: {client_address}")
         self.clients.append(client_socket)
 
+        # Send the current broadcast status (PAUSED/RESUMED) to the client on reconnect
+        status_message = "PAUSED" if self.broadcast_paused else "RESUMED"
+        client_socket.sendall(f"CONTROL:{status_message}".encode())
+
         try:
             while True:
                 data = client_socket.recv(1024).decode().strip()

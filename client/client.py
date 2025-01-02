@@ -102,54 +102,47 @@ class AudioCastClient:
         while not shutdown_event.is_set():
             if not client_socket:
                 try:
+                    logger.debug("No active socket, attempting to reconnect.")
                     client_socket = self.connect_to_server()
                     if client_socket:
                         self.connection_status.set("Connected")
+                        # Wait for the server's control message about pause/resume state
+                        control_message = client_socket.recv(1024).decode().strip()
+                        if control_message.startswith("CONTROL:"):
+                            if "PAUSED" in control_message:
+                                paused_event.set()
+                                self.pause_button.config(text="Resume broadcasts")
+                            else:
+                                paused_event.clear()
+                                self.pause_button.config(text="Pause broadcasts")
+                        else:
+                            logger.warning(f"Unexpected control message received: {control_message}")
                     else:
                         self.connection_status.set("Disconnected")
-                        time.sleep(self.retry_delay)
-                        continue
                 except Exception as e:
                     logger.error(f"Failed to connect: {e}")
                     self.connection_status.set("Disconnected")
                     time.sleep(self.retry_delay)
                     continue
 
+            if paused_event.is_set():
+                logger.info("Broadcast paused. Skipping audio.")
+                while paused_event.is_set() and not shutdown_event.is_set():
+                    time.sleep(0.1)  # Wait for the pause to be cleared
+                continue
+
             try:
                 data = client_socket.recv(CHUNK_SIZE)
-
                 if not data:
-                    logger.warning("No data received. Server may have disconnected.")
+                    logger.warning("Server disconnected.")
                     self.connection_status.set("Disconnected")
                     client_socket.close()
                     client_socket = None
                     continue
 
-                # Check for control messages
-                if data.startswith(b"CONTROL:"):
-                    control_message = data.decode().split(":", 1)[1]
-                    if control_message == "PAUSED":
-                        logger.info("Broadcast is paused by the server.")
-                        self.connection_status.set("Connected | Paused")
-                        self.update_pause_button("Resume broadcasts")
-                        paused_event.set()
-                    elif control_message == "RESUMED":
-                        logger.info("Broadcast is resumed by the server.")
-                        self.connection_status.set("Connected | Broadcasting")
-                        self.update_pause_button("Pause broadcasts")
-                        paused_event.clear()
-                    continue
-
-                # Skip playback if paused
-                if paused_event.is_set():
-                    continue
-
-                # Write audio data to stream
                 stream.write(data)
 
             except socket.timeout:
-                logger.debug("An expected socket timeout occurred; likely no data received sent to server")
-                continue
             except socket.error as e:
                 logger.error(f"Socket error: {e}")
                 if client_socket:
