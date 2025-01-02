@@ -143,6 +143,7 @@ class AudioCastClient:
                 stream.write(data)
 
             except socket.timeout:
+                pass
             except socket.error as e:
                 logger.error(f"Socket error occurred: {e}")
                 if client_socket:
