@@ -38,7 +38,10 @@ jobs:
       # Step 7: Create Installer with Inno Setup
       - name: Create Inno Setup Installer
         run: |
-          & "$innoSetupPath" "installer.iss"  # Compile the installer script with Inno Setup
+          pwsh -Command "& '$innoSetupPath' 'installer.iss'"
+        env:
+          innoSetupPath: 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe'
+          
       # Step 8: Upload Client EXE as Artifact
       - name: Upload Client EXE as Artifact
         uses: actions/upload-artifact@v4
