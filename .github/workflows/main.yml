@@ -40,7 +40,7 @@ jobs:
       - name: Install Inno Setup
         run: |
           choco install innosetup -y  # Install Inno Setup using Chocolatey
-          # Check if Inno Setup was installed in the expected paths
+          # Verify Inno Setup installation
           if (Test-Path "C:\Program Files (x86)\Inno Setup 6\ISCC.exe") {
             echo "Inno Setup installed at C:\Program Files (x86)\Inno Setup 6"
             echo "INNO_SETUP_PATH='C:\Program Files (x86)\Inno Setup 6\ISCC.exe'" >> $GITHUB_ENV
@@ -52,14 +52,14 @@ jobs:
             exit 1
           }
 
-      # Step 7: Set Inno Setup executable path dynamically
-      - name: Set Inno Setup executable path
+      - name: Build Installer
         run: |
-          # Dynamically find the installation path of Inno Setup
-          $InnoSetupPath = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
-          echo "Inno Setup installed at: $InnoSetupPath"
-          echo "INNO_SETUP_PATH=$InnoSetupPath" >> $GITHUB_ENV  # Store path as environment variable
-
+          # Explicitly call the Inno Setup executable with quotes for paths
+          $innoSetupPath = $Env:INNO_SETUP_PATH
+          $installerScript = "installer.iss"
+          Write-Host "Building installer with: $innoSetupPath $installerScript"
+          & "$innoSetupPath" "$installerScript"
+          
       # Step 8: Create Installer with Inno Setup
       - name: Create Inno Setup Installer
         run: |
