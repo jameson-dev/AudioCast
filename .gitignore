@@ -4,3 +4,4 @@
 AudioCast-client.spec
 AudioCast-server.spec
 /dist
+*.rfa
