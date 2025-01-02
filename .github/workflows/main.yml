@@ -2,13 +2,10 @@ name: Build EXE and Package with Inno Setup
 
 on:
   push:
-    branches:
-      - main
 
 jobs:
   build:
     runs-on: windows-latest
-
     steps:
       # Step 1: Checkout repository
       - name: Checkout repository
@@ -18,24 +15,21 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.12
 
       # Step 3: Install Python dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
       # Step 4: Build Client EXE with PyInstaller
       - name: Build Client EXE with build_exe.py
         run: |
           python build_exe.py client/client.py  # Build client executable
-
       # Step 5: Build Server EXE with PyInstaller
       - name: Build Server EXE with build_exe.py
         run: |
           python build_exe.py server/server.py  # Build server executable
-
       # Step 6: Install Inno Setup
       - name: Install Inno Setup
         run: |
@@ -44,8 +38,8 @@ jobs:
       # Step 7: Create Installer with Inno Setup
       - name: Create Inno Setup Installer
         run: |
-          inno setup installer.iss  # Compile the installer script with Inno Setup
-
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+          
       # Step 8: Upload Client EXE as Artifact
       - name: Upload Client EXE as Artifact
         uses: actions/upload-artifact@v4
@@ -59,7 +53,6 @@ jobs:
         with:
           name: AudioCast-Server
           path: dist/server.exe  # Path to server EXE
-
       # Step 10: Upload Installer as Artifact
       - name: Upload Installer as Artifact
         uses: actions/upload-artifact@v4
