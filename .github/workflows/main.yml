@@ -2,7 +2,7 @@ name: Build EXE and Package with Inno Setup
 
 on:
   push:
-@@ -8,36 +8,61 @@ on:
+
 jobs:
   build:
     runs-on: windows-latest
