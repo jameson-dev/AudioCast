@@ -144,15 +144,20 @@ class AudioCastClient:
 
             except socket.timeout:
             except socket.error as e:
-                logger.error(f"Socket error: {e}")
+                logger.error(f"Socket error occurred: {e}")
                 if client_socket:
                     client_socket.close()
                 client_socket = None
             except Exception as e:
-                logger.error(f"Unexpected error: {e}")
+                logger.error(f"Unexpected error in streaming: {e}")
                 if client_socket:
                     client_socket.close()
                 client_socket = None
+
+            # Check if the client_socket is still valid and try reconnecting if not
+            if client_socket is None:
+                logger.debug("Attempting to reconnect to server...")
+                time.sleep(self.retry_delay)
 
         stream.stop_stream()
         stream.close()
