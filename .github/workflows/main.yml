@@ -36,31 +36,40 @@ jobs:
         run: |
           python build_exe.py server/server.py  # Build server executable
 
-      # Step 6: Install Inno Setup
+      # Step 6: Install Inno Setup using Chocolatey
       - name: Install Inno Setup
         run: |
-          choco install innosetup  # Install Inno Setup using Chocolatey
+          choco install innosetup -y  # Install Inno Setup using Chocolatey
 
-      # Step 7: Create Installer with Inno Setup
+      # Step 7: Set Inno Setup executable path dynamically
+      - name: Set Inno Setup executable path
+        run: |
+          # Dynamically find the installation path of Inno Setup
+          $InnoSetupPath = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          echo "Inno Setup installed at: $InnoSetupPath"
+          echo "INNO_SETUP_PATH=$InnoSetupPath" >> $GITHUB_ENV  # Store path as environment variable
+
+      # Step 8: Create Installer with Inno Setup
       - name: Create Inno Setup Installer
         run: |
-          inno setup installer.iss  # Compile the installer script with Inno Setup
+          $INNO_SETUP_PATH = $Env:INNO_SETUP_PATH
+          & $INNO_SETUP_PATH installer.iss  # Use the Inno Setup executable from the dynamic path
 
-      # Step 8: Upload Client EXE as Artifact
+      # Step 9: Upload Client EXE as Artifact
       - name: Upload Client EXE as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: AudioCast-Client
           path: dist/client.exe  # Path to client EXE
 
-      # Step 9: Upload Server EXE as Artifact
+      # Step 10: Upload Server EXE as Artifact
       - name: Upload Server EXE as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: AudioCast-Server
           path: dist/server.exe  # Path to server EXE
 
-      # Step 10: Upload Installer as Artifact
+      # Step 11: Upload Installer as Artifact
       - name: Upload Installer as Artifact
         uses: actions/upload-artifact@v4
         with:
