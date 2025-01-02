@@ -46,7 +46,11 @@ class AudioCastClient:
 
         self.shutdown_event = shutdown_event
         self.paused_event = paused_event
-        self.connection_status = None  # Initialize as None, will be set in create_gui()
+
+        # Initialize status labels, will be set in create_gui()
+        self.connection_status = None
+        self.broadcast_status = None
+
 
         self.socket_lock = threading.Lock()
 
@@ -106,19 +110,24 @@ class AudioCastClient:
                     client_socket = self.connect_to_server()
                     if client_socket:
                         self.connection_status.set("Connected")
+
                         # Wait for the server's control message about pause/resume state
                         control_message = client_socket.recv(1024).decode().strip()
                         if control_message.startswith("CONTROL:"):
                             if "PAUSED" in control_message:
                                 paused_event.set()
                                 self.pause_button.config(text="Resume broadcasts")
+                                self.pause_button.config(text="Resume broadcast")
+                                self.broadcast_status.set("Broadcast Paused")
                             else:
                                 paused_event.clear()
-                                self.pause_button.config(text="Pause broadcasts")
+                                self.pause_button.config(text="Pause broadcast")
+                                self.broadcast_status.set("Broadcast Active")
                         else:
                             logger.warning(f"Unexpected control message received: {control_message}")
                     else:
                         self.connection_status.set("Disconnected")
+                        self.broadcast_status.set("Not connected")
                 except Exception as e:
                     logger.error(f"Failed to connect: {e}")
                     self.connection_status.set("Disconnected")
@@ -126,7 +135,8 @@ class AudioCastClient:
                     continue
 
             if paused_event.is_set():
-                logger.info("Broadcast paused. Skipping audio.")
+                logger.info("Broadcast paused. Skipping any broadcasts.")
+                self.broadcast_status.set("Broadcast Paused")
                 while paused_event.is_set() and not shutdown_event.is_set():
                     time.sleep(0.1)  # Wait for the pause to be cleared
                 continue
@@ -192,11 +202,17 @@ class AudioCastClient:
         self.connection_status = StringVar()
         self.connection_status.set("Disconnected")
 
-        status_label = Label(root, textvariable=self.connection_status, font=("Arial", 12), fg="green")
-        status_label.pack(pady=10)
+        self.broadcast_status = StringVar()
+        self.broadcast_status.set("Finding Broadcast Status...")
 
         title_label = Label(root, text="AudioCast Client", font=("Arial", 16))
-        title_label.pack(pady=10)
+        title_label.pack(pady=(5, 0))
+
+        status_label = Label(root, textvariable=self.connection_status, font=("Arial", 12), fg="green")
+        status_label.pack(pady=(0, 10))
+
+        broadcast_status_label = Label(root, textvariable=self.broadcast_status, font=("Arial", 10), fg="black")
+        broadcast_status_label.pack(pady=(0, 15))
 
         self.pause_button = Button(root, text="Pause Notifications", command=self.toggle_pause)
         self.pause_button.pack(pady=5)
@@ -214,18 +230,21 @@ class AudioCastClient:
                     # Send RESUME command to server
                     self.client_socket.sendall(b"RESUME")
                     paused_event.clear()
-                    self.pause_button.config(text="Pause broadcasts")
+                    self.broadcast_status.set("Broadcast Active")
+                    logger.info("Broadcast resumed. Listening for audio data")
+                    self.pause_button.config(text="Pause broadcast")
                 else:
                     # Send PAUSE command to server
                     self.client_socket.sendall(b"PAUSE")
                     paused_event.set()
-                    self.pause_button.config(text="Resume broadcasts")
+                    self.pause_button.config(text="Resume broadcast")
             except Exception as e:
                 logger.error(f"Error sending pause/resume command: {e}")
                 if self.client_socket:
                     self.client_socket.close()
                     self.client_socket = None
                     self.connection_status.set("Disconnected")
+                    self.broadcast_status.set("Not connected")
                     logger.debug("Attempting to reconnect...")
                     time.sleep(2)
                     self.connect_to_server()
