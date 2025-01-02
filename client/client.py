@@ -51,6 +51,7 @@ class AudioCastClient:
         self.connection_status = None
         self.broadcast_status = None
 
+        self.pause_button = None
 
         self.socket_lock = threading.Lock()
 
