@@ -218,7 +218,7 @@ class AudioCastClient:
         self.pause_button = Button(root, text="Pause Notifications", command=self.toggle_pause)
         self.pause_button.pack(pady=5)
 
-        exit_button = Button(root, text="Close to tray", command=root.withdraw)
+        exit_button = Button(root, text="Hide", command=root.withdraw)
         exit_button.pack(pady=5)
 
         root.withdraw()
