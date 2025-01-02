@@ -117,7 +117,6 @@ class AudioCastClient:
                         if control_message.startswith("CONTROL:"):
                             if "PAUSED" in control_message:
                                 paused_event.set()
-                                self.pause_button.config(text="Resume broadcasts")
                                 self.pause_button.config(text="Resume broadcast")
                                 self.broadcast_status.set("Broadcast Paused")
                             else:
