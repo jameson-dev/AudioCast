@@ -4,6 +4,7 @@ AppVerName=AudioCast
 AppPublisher=Jameson Bell
 AppVersion=1.0
 DefaultDirName={pf}\AudioCast
+DefaultGroupName=AudioCast
 OutputDir=Output
 OutputBaseFilename=AudioCast_Installer
 Compression=lzma
