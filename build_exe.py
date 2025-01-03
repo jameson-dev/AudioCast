@@ -9,7 +9,6 @@ def create_exe(script_name):
         command = [
             'pyinstaller',
             '--onefile',  # Single executable file
-            '--windowed',  # Hide the console window (for GUI apps)
             script_name
         ]
 
