@@ -1,3 +1,4 @@
+import os
 import signal
 import socket
 import sys
@@ -53,11 +54,11 @@ class AudioCastClient:
         self.shutdown_event = shutdown_event
         self.paused_event = paused_event
 
-        # Initialize status labels, will be set in create_gui()
+        # Initialize GUI-related variables
         self.connection_status = None
         self.broadcast_status = None
-
         self.pause_button = None
+        self.root = None
 
         self.socket_lock = threading.Lock()
 
@@ -305,12 +306,24 @@ class AudioCastClient:
                 self.client_socket.close()
                 logger.info("Client socket closed.")
             except Exception as e:
-                logger.error(f"Error while closing socket: {e}")
+                logger.error(f"Error closing socket: {e}")
 
-        # Stop PyAudio stream and terminate PyAudio instance
         p.terminate()
 
+        try:
+            if self.root:
+                self.root.quit()
+                self.root.destroy()
+        except Exception as e:
+            logger.error(f"Error destroying Tkinter root: {e}")
+
+        logger.info("Active threads during cleanup:")
+        for thread in threading.enumerate():
+            logger.info(f"Thread: {thread.name}, Alive: {thread.is_alive()}")
         logger.info("Resources cleaned up.")
+
+        logger.info("Forcing process termination.")
+        os.kill(os.getpid(), signal.SIGTERM)
 
 
 if __name__ == "__main__":
