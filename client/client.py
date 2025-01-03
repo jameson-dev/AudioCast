@@ -1,4 +1,6 @@
+import signal
 import socket
+import sys
 import threading
 import time
 import pyaudio
@@ -33,6 +35,10 @@ shutdown_event = threading.Event()
 
 # PyAudio Instance
 p = pyaudio.PyAudio()
+
+# Handle shutdown signals
+signal.signal(signal.SIGINT, lambda signum, frame: client.cleanup())
+signal.signal(signal.SIGTERM, lambda signum, frame: client.cleanup())
 
 
 class AudioCastClient:
@@ -178,8 +184,8 @@ class AudioCastClient:
 
     def create_tray_icon(self, root):
         def on_quit():
-            shutdown_event.set()
-            tray_icon.stop()
+            self.cleanup()
+            sys.exit(0)
 
         def open_gui():
             root.deiconify()
@@ -281,9 +287,30 @@ class AudioCastClient:
             root.protocol("WM_DELETE_WINDOW", root.withdraw)  # Hide window on close
             root.mainloop()
         finally:
-            shutdown_event.set()
+            logger.info("Shutting down client...")
+            self.cleanup()
             tray_icon.stop()
             audio_thread.join()
+
+    def cleanup(self):
+        logger.info("Cleaning up resources...")
+
+        # Signal all threads to stop
+        self.shutdown_event.set()
+
+        # Close the socket if it's open
+        if self.client_socket:
+            try:
+                self.client_socket.shutdown(socket.SHUT_RDWR)
+                self.client_socket.close()
+                logger.info("Client socket closed.")
+            except Exception as e:
+                logger.error(f"Error while closing socket: {e}")
+
+        # Stop PyAudio stream and terminate PyAudio instance
+        p.terminate()
+
+        logger.info("Resources cleaned up.")
 
 
 if __name__ == "__main__":
