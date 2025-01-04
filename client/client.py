@@ -229,7 +229,7 @@ class AudioCastClient:
         screen_width = root.winfo_screenwidth()
         screen_height = root.winfo_screenheight()
         window_width = 300
-        window_height = 200
+        window_height = 215
         position_x = screen_width - window_width - 10  # 10px margin from the edge
         position_y = screen_height - window_height - 100  # 100px margin from the taskbar
 
