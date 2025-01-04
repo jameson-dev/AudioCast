@@ -16,6 +16,7 @@ This project includes:
 - Automatic folder monitoring for `.rfa` file creation.
 - GUI-based client with tray icon support.
 - Pause and resume broadcast functionality.
+- Individual client muting via GUI
 - Automatic reconnect with retry mechanism.
 - Multi-threaded server supporting multiple clients.
 
