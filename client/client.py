@@ -222,7 +222,6 @@ class AudioCastClient:
     def create_gui(self):
         root = Tk()
         root.title("AudioCast Client")
-        root.geometry("300x200")
         root.resizable(False, False)
 
         # Calculate the position for the bottom-right corner
