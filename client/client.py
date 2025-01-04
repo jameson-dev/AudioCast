@@ -58,6 +58,8 @@ class AudioCastClient:
         self.connection_status = None
         self.broadcast_status = None
         self.pause_button = None
+        self.mute_button = None
+        self.is_muted = False
         self.root = None
 
         self.socket_lock = threading.Lock()
@@ -101,6 +103,17 @@ class AudioCastClient:
 
         logger.debug("Exiting connect_to_server due to shutdown event.")
         return None
+
+    def toggle_client_mute(self):
+        self.is_muted = not self.is_muted
+
+        # Update the mute button text based on mute state
+        if self.is_muted:
+            logger.info("Client muted.")
+            self.mute_button.config(text="Unmute Client")
+        else:
+            logger.info("Client unmuted.")
+            self.mute_button.config(text="Mute Client")
 
     def stream_audio(self):
         logger.debug("stream_audio called")
@@ -158,7 +171,11 @@ class AudioCastClient:
                     client_socket = None
                     continue
 
-                stream.write(data)
+                if self.is_muted:
+                    # Mute audio by not writing and data to stream
+                    continue
+                else:
+                    stream.write(data)
 
             except socket.timeout:
                 pass
@@ -236,6 +253,9 @@ class AudioCastClient:
 
         self.pause_button = Button(root, text="Pause Notifications", command=self.toggle_pause)
         self.pause_button.pack(pady=5)
+
+        self.mute_button = Button(root, text="Mute Client", command=self.toggle_client_mute)
+        self.mute_button.pack(pady=5)
 
         exit_button = Button(root, text="Hide", command=root.withdraw)
         exit_button.pack(pady=5)
