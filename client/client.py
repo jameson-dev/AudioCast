@@ -251,7 +251,7 @@ class AudioCastClient:
         broadcast_status_label = Label(root, textvariable=self.broadcast_status, font=("Arial", 10), fg="black")
         broadcast_status_label.pack(pady=(0, 15))
 
-        self.pause_button = Button(root, text="Pause Notifications", command=self.toggle_pause)
+        self.pause_button = Button(root, text="Pause Notifications", command=self.toggle_broadcast_pause)
         self.pause_button.pack(pady=5)
 
         self.mute_button = Button(root, text="Mute Client", command=self.toggle_client_mute)
@@ -263,7 +263,7 @@ class AudioCastClient:
         root.withdraw()
         return root
 
-    def toggle_pause(self):
+    def toggle_broadcast_pause(self):
         if self.client_socket:
             try:
                 if paused_event.is_set():
