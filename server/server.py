@@ -3,6 +3,7 @@ import re
 import socket
 import threading
 import time
+import json
 
 import pyaudio
 import signal
@@ -13,21 +14,40 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, DirCreatedEvent, FileCreatedEvent
 from concurrent.futures import ThreadPoolExecutor
 
+
+def load_config(config_path='server-config.json'):
+    # Default config values
+    default_config = {
+        'host': '0.0.0.0',
+        'port': 12345,
+        'watchdog_folder': 'rfa',
+        'audio_files': 'wav-files'
+    }
+
+    # Check if the config file exists
+    if os.path.exists(config_path):
+        # If the file exists, load it
+        with open(config_path, 'r') as config_file:
+            try:
+                config = json.load(config_file)
+                logger.info("Configuration loaded successfully.")
+                return config
+            except json.JSONDecodeError:
+                logger.error("Invalid JSON format in config file. Using default settings.")
+                return default_config
+    else:
+        # If the file does not exist, create it with default values
+        with open(config_path, 'w') as config_file:
+            json.dump(default_config, config_file, indent=4)
+        logger.warning(f"Config file '{config_path}' not found. Creating it now..")
+        return default_config
+
+
 parser = argparse.ArgumentParser(description="AudioCast Streaming Server")
 parser.add_argument("--host", default="0.0.0.0", help="Server Hostname (Default: 0.0.0.0)")
 parser.add_argument("--port", type=int, default=12345, help="Server Port (Default: 12345)")
 parser.add_argument("--watchdog-folder", default="rfa", help="Folder to monitor for .rfa files")
 parser.add_argument("--audio-files", default="wav-files", help="Folder where .wav files are stored")
-
-args = parser.parse_args()
-
-# Folder to monitor
-WATCHDOG_FOLDER = Path(args.watchdog_folder)
-AUDIO_FILES_FOLDER = Path(args.audio_files)
-
-# Server settings
-HOST = args.host
-PORT = args.port
 
 # pyAudio settings
 CHUNK_SIZE = 1024
@@ -53,8 +73,9 @@ def check_dirs(dir_path):
 
 
 class FileHandler(FileSystemEventHandler):
-    def __init__(self, server):
+    def __init__(self, server, audio_files_folder):
         self.server = server
+        self.audio_files_folder = audio_files_folder  # Store it as an instance variable
 
     def on_created(self, event: DirCreatedEvent | FileCreatedEvent) -> None:
         if event.is_directory:
@@ -78,7 +99,7 @@ class FileHandler(FileSystemEventHandler):
         # Replace spaces with underscores for .wav file matching
         wav_file_name = normalized_keyword.replace(" ", "_") + ".wav"
 
-        audio_file_path = os.path.join(AUDIO_FILES_FOLDER, wav_file_name)
+        audio_file_path = os.path.join(self.audio_files_folder, wav_file_name)
 
         if os.path.exists(audio_file_path):
             logger.debug(f"Found audio file {audio_file_path}")
@@ -98,9 +119,11 @@ class FileHandler(FileSystemEventHandler):
 
 
 class AudioServer:
-    def __init__(self, host, port, max_workers=10):
+    def __init__(self, host, port, watchdog_folder, audio_files_folder, max_workers=10):
         self.host = host
         self.port = port
+        self.watchdog_folder = Path(watchdog_folder)
+        self.audio_files_folder = Path(audio_files_folder)  # Store audio_files_folder
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.bind((host, port))
         self.server_socket.listen(5)
@@ -109,11 +132,12 @@ class AudioServer:
         self.broadcast_paused = False
         self.heartbeat_interval = 5
 
+        # Initialize folder monitoring (watchdog)
         self.observer = Observer()
-        self.event_handler = FileHandler(self)
-        self.observer.schedule(self.event_handler, WATCHDOG_FOLDER, recursive=False)
+        self.event_handler = FileHandler(self, self.audio_files_folder)  # Pass AUDIO_FILES_FOLDER here
+        self.observer.schedule(self.event_handler, self.watchdog_folder, recursive=False)
 
-        # Initialise thread pool
+        # Initialize thread pool
         self.executor = ThreadPoolExecutor(max_workers=max_workers)
 
     def handle_client(self, client_socket, client_address):
@@ -215,13 +239,32 @@ def signal_handler(signum, frame):
 
 
 def main():
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
+    # Load configuration from config.json
+    config = load_config()
 
-    check_dirs(WATCHDOG_FOLDER)
-    check_dirs(AUDIO_FILES_FOLDER)
+    # Parse arguments
+    args = parser.parse_args()
 
-    server = AudioServer(HOST, PORT)
+    # Override config values with command-line arguments if present
+    config.update({
+        'host': args.host or config['host'],
+        'port': args.port or config['port'],
+        'watchdog_folder': args.watchdog_folder or config['watchdog_folder'],
+        'audio_files': args.audio_files or config['audio_files']
+    })
+
+    # Now use the values from config
+    watchdog_folder = Path(config['watchdog_folder'])
+    audio_files_folder = Path(config['audio_files'])
+    host = config['host']
+    port = config['port']
+
+    # Check and create necessary directories
+    check_dirs(watchdog_folder)
+    check_dirs(audio_files_folder)
+
+    # Start the server
+    server = AudioServer(host, port, config['watchdog_folder'], config['audio_files'])
     server.start_folder_monitor()
 
     try:
