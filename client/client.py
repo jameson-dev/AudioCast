@@ -209,13 +209,12 @@ class AudioCastClient:
             root.deiconify()
 
         # Create tray icon
-        image = Image.new('RGB', (64, 64), color=(0, 0, 0))
-        draw = ImageDraw.Draw(image)
-        draw.rectangle((16, 16, 48, 48), fill=(255, 255, 255))
+        icon_path = os.path.join(os.path.dirname(__file__), 'assets', 'audiocast.ico')
+        icon_image = Image.open(icon_path)
 
         menu = Menu(MenuItem('Open', open_gui), MenuItem('Quit', on_quit))
 
-        tray_icon = Icon("AudioCast Client", image, "AudioCast", menu)
+        tray_icon = Icon("AudioCast Client", icon_image, "AudioCast", menu)
 
         return tray_icon
 
@@ -223,6 +222,8 @@ class AudioCastClient:
         root = Tk()
         root.title("AudioCast Client")
         root.resizable(False, False)
+
+        root.iconbitmap("assets\\audiocast.ico")
 
         # Calculate the position for the bottom-right corner
         screen_width = root.winfo_screenwidth()
