@@ -8,7 +8,8 @@ def create_exe(script_name):
     if "server.py" in script_name:
         command = [
             'pyinstaller',
-            '--onefile',  # Single executable file
+            '--onefile',
+            '--add-data "assets/audiocast.ico;assets'
             '--icon=assets/audiocast.ico',
             script_name
         ]
@@ -18,9 +19,10 @@ def create_exe(script_name):
     elif "client.py" in script_name:
         command = [
             'pyinstaller',
-            '--onefile',  # Single executable file
+            '--onefile',
+            '--add-data "assets/audiocast.ico;assets'
             '--icon=assets/audiocast.ico',
-            '--windowed',  # Hide the console window
+            '--windowed',
             script_name
         ]
 
