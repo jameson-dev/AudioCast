@@ -9,7 +9,7 @@ def create_exe(script_name):
         command = [
             'pyinstaller',
             '--onefile',
-            '--add-data "assets/audiocast.ico;assets'
+            '--add-data "assets/audiocast.ico;assets"',
             '--icon=assets/audiocast.ico',
             script_name
         ]
@@ -20,7 +20,7 @@ def create_exe(script_name):
         command = [
             'pyinstaller',
             '--onefile',
-            '--add-data "assets/audiocast.ico;assets'
+            '--add-data "assets/audiocast.ico;assets"',
             '--icon=assets/audiocast.ico',
             '--windowed',
             script_name
