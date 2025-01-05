@@ -6,25 +6,12 @@ import os
 def create_exe(script_name):
     # Define the PyInstaller command
     if "server.py" in script_name:
-        command = [
-            'pyinstaller',
-            '--onefile',
-            '--add-data "assets\\audiocast.ico;assets"',
-            '--icon=assets/audiocast.ico',
-            script_name
-        ]
+        command = f'pyinstaller --onefile --add-data "assets/audiocast.ico;assets" --icon=assets/audiocast.ico {script_name}'
 
         # Run PyInstaller command
         subprocess.check_call(command)
     elif "client.py" in script_name:
-        command = [
-            'pyinstaller',
-            '--onefile',
-            '--add-data "assets\\audiocast.ico;assets"',
-            '--icon=assets/audiocast.ico',
-            '--windowed',
-            script_name
-        ]
+        command = f'pyinstaller --onefile --add-data "assets/audiocast.ico;assets" --icon=assets/audiocast.ico --windowed {script_name}'
 
         # Run PyInstaller command
         subprocess.check_call(command)
