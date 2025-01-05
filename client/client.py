@@ -223,6 +223,8 @@ class AudioCastClient:
         root.title("AudioCast Client")
         root.resizable(False, False)
 
+        root.iconbitmap("assets\\audiocast.ico")
+
         # Calculate the position for the bottom-right corner
         screen_width = root.winfo_screenwidth()
         screen_height = root.winfo_screenheight()
