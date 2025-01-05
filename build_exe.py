@@ -9,6 +9,7 @@ def create_exe(script_name):
         command = [
             'pyinstaller',
             '--onefile',  # Single executable file
+            '--icon=assets/audiocast.ico',
             script_name
         ]
 
@@ -18,7 +19,8 @@ def create_exe(script_name):
         command = [
             'pyinstaller',
             '--onefile',  # Single executable file
-            '--windowed',  # Hide the console window (for GUI apps)
+            '--icon=assets/audiocast.ico',
+            '--windowed',  # Hide the console window
             script_name
         ]
 
