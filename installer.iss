@@ -11,6 +11,7 @@ Compression=lzma
 SolidCompression=yes
 Uninstallable=yes
 SetupIconFile=assets\audiocast.ico
+UninstallDisplayIcon=assets\audiocast.ico
 
 [Files]
 Source: "dist\client.exe"; DestDir: "{app}"; Flags: ignoreversion
