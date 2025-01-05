@@ -10,7 +10,7 @@ OutputBaseFilename=AudioCast_Installer
 Compression=lzma
 SolidCompression=yes
 Uninstallable=yes
-SetupIconFile=assets\icon.ico
+SetupIconFile=assets\audiocast.ico
 
 [Files]
 Source: "dist\client.exe"; DestDir: "{app}"; Flags: ignoreversion
