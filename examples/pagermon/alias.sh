@@ -49,23 +49,28 @@ if result=$(contains_keyword "$MESSAGE"); then
 fi
 
 if [ -n "$MATCHED_KEYWORD" ]; then
-    # Extract basic information from the JSON using grep and sed
+    # Extract the ID from the JSON using grep and sed (fallback to 'unknown' if not found)
     ID=$(echo "$DATA" | grep -o '"id":"[^"]*"' | sed 's/"id":"\(.*\)"/\1/')
-    TIMESTAMP=$(echo "$DATA" | grep -o '"timestamp":"[^"]*"' | sed 's/"timestamp":"\(.*\)"/\1/')
+    ID=${ID:-unknown}
 
-    # Create a timestamped file named after the matched keyword
-    FILENAME="$OUTPUT_DIR/$(echo "$MATCHED_KEYWORD" | tr ' ' '_')_${TIMESTAMP:-unknown}_${ID:-unknown}.rfa"
+    # Get the current system timestamp in the format YYYYMMDD_HHMMSS
+    TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+
+    # Extract the priority from the message (P1, P2, or P3)
+    PRIORITY=$(echo "$MESSAGE" | grep -o ' P[123] ')
+    PRIORITY=${PRIORITY:-P?}
+
+    # Create a timestamped file named after the matched keyword and priority
+    FILENAME="$OUTPUT_DIR/${PRIORITY}_$(echo "$MATCHED_KEYWORD" | tr ' ' '_')_${TIMESTAMP}_${ID}.rfa"
 
     # Write minimal details to the file
     {
         echo "Incident Detected: $MATCHED_KEYWORD"
+        echo "Priority: $PRIORITY"
         echo "Address: $ADDRESS"
         echo "Message: $MESSAGE"
-        echo "Timestamp: ${TIMESTAMP:-unknown}"
-        echo "ID: ${ID:-unknown}"
-    } > "$FILENAME"
-
-    echo "File created: $FILENAME"
-else
+        echo "System Timestamp: $TIMESTAMP"
+        echo "ID: $ID"
+    } > "$FILENAME"else
     echo "No keyword match found in the message."
 fi
