@@ -13,6 +13,11 @@ Uninstallable=yes
 SetupIconFile=assets\audiocast.ico
 UninstallDisplayIcon=assets\audiocast.ico
 
+[Types]
+Name: "full"; Description: "Install both Client and Server"
+Name: "client"; Description: "Install Client only"
+Name: "server"; Description: "Install Server only"
+
 [Components]
 Name: "client"; Description: "Client"; Types: full client
 Name: "server"; Description: "Server"; Types: full server
