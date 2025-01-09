@@ -10,9 +10,7 @@ DATA="$3"          # Data (JSON)
 OUTPUT_DIR="/home/Administrator/AudioCast/server/rfa"  # Directory to save output files
 
 # Keywords to search for (one per line)
-KEYWORDS="ADDITIONAL
-STOP FOR
-TREE DOWN
+KEYWORDS="TREE DOWN
 ROAD CRASH RESCUE
 VEHICLE ACCIDENT
 RESCUE VERTICAL
