@@ -30,6 +30,13 @@ jobs:
       - name: Build Server EXE with build_exe.py
         run: |
           python build_exe.py server/server.py  # Build server executable
+      - name: List files in dist before Inno Setup
+        run: |
+          echo "Listing files in dist before Inno Setup"
+          dir dist
+          dir dist\client
+          dir dist\server
+          
       # Step 6: Install Inno Setup
       - name: Install Inno Setup
         run: |
