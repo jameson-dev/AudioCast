@@ -24,10 +24,10 @@ Name: "server"; Description: "Server"; Types: full server
 
 [Files]
 ; Include all client files and folders
-Source: "{src}\dist\client\*"; DestDir: "{app}\client"; Flags: recursesubdirs createallsubdirs ignoreversion; Components: client
+Source: "dist\client\client.exe"; DestDir: "{app}\client"; Flags: recursesubdirs createallsubdirs ignoreversion; Components: client
 
 ; Include all server files and folders
-Source: "{src}\dist\server\*"; DestDir: "{app}\server"; Flags: recursesubdirs createallsubdirs ignoreversion; Components: server
+Source: "dist\server\server.exe"; DestDir: "{app}\server"; Flags: recursesubdirs createallsubdirs ignoreversion; Components: server
 
 ; Include shared assets
 Source: "assets\audiocast.ico"; DestDir: "{app}\assets"; Flags: ignoreversion
