@@ -39,7 +39,11 @@ jobs:
       - name: Create Inno Setup Installer
         run: |
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
-          
+
+      - name: Verify dist directory structure
+        run: |
+          dir dist /s
+    
       # Step 8: Upload Client EXE as Artifact
       - name: Upload Client EXE as Artifact
         uses: actions/upload-artifact@v4
