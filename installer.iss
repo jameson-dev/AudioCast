@@ -13,14 +13,32 @@ Uninstallable=yes
 SetupIconFile=assets\audiocast.ico
 UninstallDisplayIcon=assets\audiocast.ico
 
+[Types]
+Name: "full"; Description: "Install both Client and Server"
+Name: "client"; Description: "Install Client only"
+Name: "server"; Description: "Install Server only"
+
+[Components]
+Name: "client"; Description: "Client"; Types: full client
+Name: "server"; Description: "Server"; Types: full server
+
 [Files]
-Source: "dist\client.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "dist\server.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "assets\audiocast.ico"; DestDir: "{app}\assets"
+; Include all client files and folders
+Source: "dist\client\client.exe"; DestDir: "{app}\client"; Flags: recursesubdirs createallsubdirs ignoreversion; Components: client
+
+; Include all server files and folders
+Source: "dist\server\server.exe"; DestDir: "{app}\server"; Flags: recursesubdirs createallsubdirs ignoreversion; Components: server
+
+; Include shared assets
+Source: "assets\audiocast.ico"; DestDir: "{app}\assets"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\AudioCast Client"; Filename: "{app}\client.exe"; IconFilename: "{app}\assets\audiocast.ico"
-Name: "{group}\AudioCast Server"; Filename: "{app}\server.exe"; IconFilename: "{app}\assets\audiocast.ico"
+; Shortcut for client
+Name: "{group}\AudioCast Client"; Filename: "{app}\client\client.exe"; IconFilename: "{app}\assets\audiocast.ico"; Components: client
+
+; Shortcut for server
+Name: "{group}\AudioCast Server"; Filename: "{app}\server\server.exe"; IconFilename: "{app}\assets\audiocast.ico"; Components: server
 
 [Registry]
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "AudioCast"; ValueData: "{app}\client.exe"; Flags: uninsdeletevalue
+; Add client to startup only if client is installed
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "AudioCast"; ValueData: "{app}\client\client.exe"; Flags: uninsdeletevalue; Components: client

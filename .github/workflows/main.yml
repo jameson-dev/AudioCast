@@ -30,6 +30,13 @@ jobs:
       - name: Build Server EXE with build_exe.py
         run: |
           python build_exe.py server/server.py  # Build server executable
+      - name: List files in dist before Inno Setup
+        run: |
+          echo "Listing files in dist before Inno Setup"
+          dir dist
+          dir dist\client
+          dir dist\server
+          
       # Step 6: Install Inno Setup
       - name: Install Inno Setup
         run: |
@@ -39,20 +46,20 @@ jobs:
       - name: Create Inno Setup Installer
         run: |
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
-          
+    
       # Step 8: Upload Client EXE as Artifact
       - name: Upload Client EXE as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: AudioCast-Client
-          path: dist/client.exe  # Path to client EXE
+          path: dist/client/client.exe  # Path to client EXE
 
       # Step 9: Upload Server EXE as Artifact
       - name: Upload Server EXE as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: AudioCast-Server
-          path: dist/server.exe  # Path to server EXE
+          path: dist/server/server.exe  # Path to server EXE
       # Step 10: Upload Installer as Artifact
       - name: Upload Installer as Artifact
         uses: actions/upload-artifact@v4
