@@ -31,4 +31,4 @@ fi
 
 # Run the server
 echo "Starting server..."
-python3 server.py "$@"
+python3 server.py "$@" 2> >(grep -v "ALSA lib" >&2)
