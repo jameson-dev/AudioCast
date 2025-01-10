@@ -13,6 +13,7 @@ from loguru import logger
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, DirCreatedEvent, FileCreatedEvent
 from concurrent.futures import ThreadPoolExecutor
+from typing import Union
 
 
 def load_config(config_path='server-config.json'):
@@ -77,7 +78,7 @@ class FileHandler(FileSystemEventHandler):
         self.server = server
         self.audio_files_folder = audio_files_folder  # Store it as an instance variable
 
-    def on_created(self, event: DirCreatedEvent | FileCreatedEvent) -> None:
+    def on_created(self, event: Union[DirCreatedEvent, FileCreatedEvent]) -> None:
         if event.is_directory:
             return
         if event.src_path.endswith(".rfa"):
