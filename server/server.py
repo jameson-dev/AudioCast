@@ -305,4 +305,6 @@ def main():
 
 
 if __name__ == "__main__":
+    signal.signal(signal.SIGINT, signal_handler)  # Handle Ctrl+C (SIGINT)
+    signal.signal(signal.SIGTERM, signal_handler)  # Handle termination (SIGTERM)
     main()
