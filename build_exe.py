@@ -14,9 +14,9 @@ def create_exe(script_name):
 
     # Define the PyInstaller command
     if "server.py" in script_name:
-        command = f'pyinstaller --onefile --add-data "../assets/audiocast.ico;../assets" --distpath dist\\server --icon=assets/audiocast.ico {script_path}'
+        command = f'pyinstaller --onefile --add-data "../assets/audiocast.ico;assets" --distpath dist\\server --icon=assets/audiocast.ico {script_path}'
     elif "client.py" in script_name:
-        command = f'pyinstaller --onefile --add-data "../assets/audiocast.ico;../assets" --distpath dist\\client --icon=assets/audiocast.ico --windowed {script_path}'
+        command = f'pyinstaller --onefile --add-data "../assets/audiocast.ico;assets" --distpath dist\\client --icon=assets/audiocast.ico --windowed {script_path}'
     else:
         print("Invalid script name. Use client.py or server.py.")
         sys.exit(1)
