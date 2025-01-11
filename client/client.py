@@ -6,6 +6,7 @@ import threading
 import time
 import pyaudio
 import argparse
+import json
 from loguru import logger
 from tkinter import Tk, Button, Label, StringVar
 from pystray import Icon, MenuItem, Menu
@@ -17,13 +18,7 @@ parser.add_argument("--host", default='127.0.0.1', help="Server Hostname (Defaul
 parser.add_argument("--port", type=int, default=12345, help="Server Port (Default: 12345)")
 parser.add_argument("--retry", type=int, default=5, help="Reconnect delay in seconds (Default: 5 seconds)")
 parser.add_argument("--heartbeat", type=bool, default=True, help="Enable client heartbeat (Default: True)")
-args = parser.parse_args()
-
-# Server settings
-HOST = args.host
-PORT = args.port
-RETRY_DELAY = args.retry
-HEARTBEAT_ENABLED = args.heartbeat
+parser.add_argument("--start-muted", default=False, help="Whether the client is muted by default")
 
 # PyAudio settings
 CHUNK_SIZE = 1024
@@ -37,16 +32,41 @@ shutdown_event = threading.Event()
 # PyAudio Instance
 p = pyaudio.PyAudio()
 
-# Handle shutdown signals
-signal.signal(signal.SIGINT, lambda signum, frame: client.cleanup())
-signal.signal(signal.SIGTERM, lambda signum, frame: client.cleanup())
+
+def load_config(config_path='client-config.json'):
+    # Default config values
+    default_config = {
+        'host': '127.0.0.1',
+        'port': 12345,
+        'reconnect_delay': 5,
+        'heartbeat_enabled': True,
+        'start_muted': False
+    }
+
+    # Check if the config file exists
+    if os.path.exists(config_path):
+        # If the file exists, load it
+        with open(config_path, 'r') as config_file:
+            try:
+                config = json.load(config_file)
+                logger.info("Client configuration loaded successfully.")
+                return config
+            except json.JSONDecodeError:
+                logger.error("Invalid JSON format in config file. Using default settings.")
+                return default_config
+    else:
+        # If the file does not exist, create it with default values
+        with open(config_path, 'w') as config_file:
+            json.dump(default_config, config_file, indent=4)
+        logger.warning(f"Config file '{config_path}' not found. Creating it now..")
+        return default_config
 
 
 class AudioCastClient:
     def __init__(self, host, port, retry_delay, heartbeat_enabled):
         self.host = host
         self.port = port
-        self.retry_delay = retry_delay
+        self.reconnect_delay = retry_delay
         self.heartbeat_enabled = heartbeat_enabled
 
         self.client_socket = None
@@ -64,6 +84,13 @@ class AudioCastClient:
 
         self.socket_lock = threading.Lock()
 
+        config = load_config()
+        if config.get('start_muted', False):
+            self.is_muted = True
+            logger.info("Client is muted by default")
+        else:
+            logger.info("Client is not muted by default")
+
     def connect_to_server(self):
         while not self.shutdown_event.is_set():
             try:
@@ -80,7 +107,7 @@ class AudioCastClient:
                         logger.debug("Creating a new socket...")
                         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                         client_socket.settimeout(5)
-                        logger.debug(f"Connecting to {self.host}:{self.port}...")
+                        logger.info(f"Connecting to {self.host}:{self.port}...")
 
                         client_socket.connect((self.host, self.port))
 
@@ -99,7 +126,7 @@ class AudioCastClient:
                 logger.error(f"Error in connect_to_server: {e}")
                 self.connection_status.set("Disconnected")
                 self.broadcast_status.set("Not connected")
-                time.sleep(self.retry_delay)
+                time.sleep(self.reconnect_delay)
 
         logger.debug("Exiting connect_to_server due to shutdown event.")
         return None
@@ -152,7 +179,7 @@ class AudioCastClient:
                 except Exception as e:
                     logger.error(f"Failed to connect: {e}")
                     self.connection_status.set("Disconnected")
-                    time.sleep(self.retry_delay)
+                    time.sleep(self.reconnect_delay)
                     continue
 
             if paused_event.is_set():
@@ -193,7 +220,7 @@ class AudioCastClient:
             # Check if the client_socket is still valid and try reconnecting if not
             if client_socket is None:
                 logger.debug("Attempting to reconnect to server...")
-                time.sleep(self.retry_delay)
+                time.sleep(self.reconnect_delay)
 
         stream.stop_stream()
         stream.close()
@@ -209,7 +236,7 @@ class AudioCastClient:
             root.deiconify()
 
         # Create tray icon
-        icon_path = os.path.join(os.path.dirname(__file__), 'assets', 'audiocast.ico')
+        icon_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'audiocast.ico')
         icon_image = Image.open(icon_path)
 
         menu = Menu(MenuItem('Open', open_gui), MenuItem('Quit', on_quit))
@@ -254,7 +281,8 @@ class AudioCastClient:
         self.pause_button = Button(root, text="Pause Notifications", command=self.toggle_broadcast_pause)
         self.pause_button.pack(pady=5)
 
-        self.mute_button = Button(root, text="Mute Client", command=self.toggle_client_mute)
+        mute_button_text = "Unmute Client" if self.is_muted else "Mute Client"
+        self.mute_button = Button(root, text=mute_button_text, command=self.toggle_client_mute)
         self.mute_button.pack(pady=5)
 
         exit_button = Button(root, text="Hide", command=root.withdraw)
@@ -346,9 +374,42 @@ class AudioCastClient:
         os.kill(os.getpid(), signal.SIGTERM)
 
 
-if __name__ == "__main__":
-    client = AudioCastClient(HOST, PORT, RETRY_DELAY, HEARTBEAT_ENABLED)
+def main():
+
+    # Handle shutdown signals
+    signal.signal(signal.SIGINT, lambda signum, frame: client.cleanup())
+    signal.signal(signal.SIGTERM, lambda signum, frame: client.cleanup())
+
+    # Load configuration from config.json
+    config = load_config()
+
+    # Parse arguments
+    args = parser.parse_args()
+
+    # Only update config with explicitly provided arguments
+    for key, value in vars(args).items():
+        default_value = parser.get_default(key)
+        if value != default_value:  # Only override if the argument is explicitly set
+            config[key] = value
+
+    # Override config values with command-line arguments if present
+    config.update({
+        'host': config['host'],
+        'port': int(config['port']),
+        'reconnect_delay': int(config['reconnect_delay']),
+        'heartbeat_enabled': config['heartbeat_enabled'],
+        'start_muted': config['start_muted']
+    })
+
+    # Server settings
+    host = config['host']
+    port = config['port']
+    reconnect_delay = config['reconnect_delay']
+    heartbeat_enabled = config['heartbeat_enabled']
+
+    client = AudioCastClient(host, port, reconnect_delay, heartbeat_enabled)
     client.run()
 
 
-
+if __name__ == "__main__":
+    main()

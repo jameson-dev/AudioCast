@@ -1,0 +1,7 @@
+{
+    "host": "127.0.0.1",
+    "port": 12345,
+    "reconnect_delay": 5,
+    "heartbeat_enabled": true,
+    "start_muted": false
+}

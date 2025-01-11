@@ -31,7 +31,7 @@ def load_config(config_path='server-config.json'):
         with open(config_path, 'r') as config_file:
             try:
                 config = json.load(config_file)
-                logger.info("Configuration loaded successfully.")
+                logger.info("Server configuration loaded successfully.")
                 return config
             except json.JSONDecodeError:
                 logger.error("Invalid JSON format in config file. Using default settings.")
