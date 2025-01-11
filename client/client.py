@@ -6,6 +6,7 @@ import threading
 import time
 import pyaudio
 import argparse
+import json
 from loguru import logger
 from tkinter import Tk, Button, Label, StringVar
 from pystray import Icon, MenuItem, Menu
@@ -17,6 +18,8 @@ parser.add_argument("--host", default='127.0.0.1', help="Server Hostname (Defaul
 parser.add_argument("--port", type=int, default=12345, help="Server Port (Default: 12345)")
 parser.add_argument("--retry", type=int, default=5, help="Reconnect delay in seconds (Default: 5 seconds)")
 parser.add_argument("--heartbeat", type=bool, default=True, help="Enable client heartbeat (Default: True)")
+parser.add_argument("--start-muted", default=False, help="Whether the client is muted by default")
+
 args = parser.parse_args()
 
 # Server settings
@@ -42,6 +45,31 @@ signal.signal(signal.SIGINT, lambda signum, frame: client.cleanup())
 signal.signal(signal.SIGTERM, lambda signum, frame: client.cleanup())
 
 
+def load_config(config_path='client-config.json'):
+    # Default config values
+    default_config = {
+        'muted_by_default': 'false'
+    }
+
+    # Check if the config file exists
+    if os.path.exists(config_path):
+        # If the file exists, load it
+        with open(config_path, 'r') as config_file:
+            try:
+                config = json.load(config_file)
+                logger.info("Client configuration loaded successfully.")
+                return config
+            except json.JSONDecodeError:
+                logger.error("Invalid JSON format in config file. Using default settings.")
+                return default_config
+    else:
+        # If the file does not exist, create it with default values
+        with open(config_path, 'w') as config_file:
+            json.dump(default_config, config_file, indent=4)
+        logger.warning(f"Config file '{config_path}' not found. Creating it now..")
+        return default_config
+
+
 class AudioCastClient:
     def __init__(self, host, port, retry_delay, heartbeat_enabled):
         self.host = host
@@ -63,6 +91,13 @@ class AudioCastClient:
         self.root = None
 
         self.socket_lock = threading.Lock()
+
+        config = load_config()
+        if config.get('muted_by_default', 'false').lower() == 'true':
+            self.is_muted = True
+            logger.info("Client is muted by default")
+        else:
+            logger.info("Client is not muted by default")
 
     def connect_to_server(self):
         while not self.shutdown_event.is_set():
@@ -209,7 +244,7 @@ class AudioCastClient:
             root.deiconify()
 
         # Create tray icon
-        icon_path = os.path.join(os.path.dirname(__file__), 'assets', 'audiocast.ico')
+        icon_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'audiocast.ico')
         icon_image = Image.open(icon_path)
 
         menu = Menu(MenuItem('Open', open_gui), MenuItem('Quit', on_quit))
@@ -254,7 +289,8 @@ class AudioCastClient:
         self.pause_button = Button(root, text="Pause Notifications", command=self.toggle_broadcast_pause)
         self.pause_button.pack(pady=5)
 
-        self.mute_button = Button(root, text="Mute Client", command=self.toggle_client_mute)
+        mute_button_text = "Unmute Client" if self.is_muted else "Mute Client"
+        self.mute_button = Button(root, text=mute_button_text, command=self.toggle_client_mute)
         self.mute_button.pack(pady=5)
 
         exit_button = Button(root, text="Hide", command=root.withdraw)
