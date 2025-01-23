@@ -236,7 +236,8 @@ class RFAStreamClient:
             root.deiconify()
 
         # Create tray icon
-        icon_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'rfastream.ico')
+        install_dir = os.path.dirname(os.path.realpath(__file__))
+        icon_path = os.path.join(install_dir, 'assets', 'rfastream.ico')
         icon_image = Image.open(icon_path)
 
         menu = Menu(MenuItem('Open', open_gui), MenuItem('Quit', on_quit))
