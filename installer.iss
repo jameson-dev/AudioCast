@@ -42,3 +42,5 @@ Name: "{group}\RFAStream Server"; Filename: "{app}\server\server.exe"; IconFilen
 [Registry]
 ; Add client to startup only if client is installed
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "RFAStream"; ValueData: "{app}\client\client.exe"; Flags: uninsdeletevalue; Components: client
+; Add icon to Uninstall
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\YourApp"; ValueType: string; ValueName: "DisplayIcon"; ValueData: "{app}\assets\rfastream.ico"
