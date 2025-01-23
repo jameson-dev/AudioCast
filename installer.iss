@@ -33,7 +33,7 @@ Source: "dist\server\server.exe"; DestDir: "{app}\server"; Flags: recursesubdirs
 Source: "assets\rfastream.ico"; DestDir: "{app}\assets"; Flags: ignoreversion
 
 ; Add client-config.json to AppData folder
-Source: "client-config.json"; DestDir: "{userappdata}\RFAStream"; Flags: ignoreversion
+Source: "client\client-config.json"; DestDir: "{userappdata}\RFAStream"; Flags: ignoreversion
 
 [Icons]
 ; Shortcut for client
@@ -43,7 +43,7 @@ Name: "{group}\RFAStream Client"; Filename: "{app}\client\client.exe"; IconFilen
 Name: "{group}\RFAStream Server"; Filename: "{app}\server\server.exe"; IconFilename: "{app}\assets\rfastream.ico"; Components: server
 
 ; Create a shortcut for the client-config.json in the installation folder
-Name: "{app}\client-config.json"; Filename: "{userappdata}\RFAStream\client-config.json"; WorkingDir: "{app}"; IconFilename: "{app}\assets\rfastream.ico"
+Name: "{app}\client\client-config.json"; Filename: "{userappdata}\RFAStream\client-config.json"; WorkingDir: "{app}"; IconFilename: "{app}\assets\rfastream.ico"
 
 [Registry]
 ; Add client to startup only if client is installed
