@@ -33,7 +33,12 @@ shutdown_event = threading.Event()
 p = pyaudio.PyAudio()
 
 
-def load_config(config_path='client-config.json'):
+def load_config(config_file_name='client-config.json'):
+
+    # Use the AppData folder to store the config file
+    appdata_folder = os.getenv('APPDATA')
+    config_path = os.path.join(appdata_folder, 'RFAStream', config_file_name)
+
     # Default config values
     default_config = {
         'host': '127.0.0.1',
