@@ -1,5 +1,5 @@
-# 🎧 AudioCast Streaming System
-**AudioCast** is a client-server audio streaming system designed to broadcast audio alerts in real-time. It is  based on the requirements for **emergency services**, but can be used for any system that requires dynamic audio alerts based on priority levels.
+# 🎧 RFAStream Streaming System
+**RFAStream** is a client-server audio streaming system designed to broadcast audio alerts in real-time for RFAs (Request for Assistance). It is  based on the requirements for **emergency services** keeping track of the job type and priority.
 
 The server monitors a folder for `.rfa` files, which trigger corresponding `.wav` audio files to be streamed to clients. Alerts can be categorized by priority (e.g., P1, P2, P3), with audio played based on the alert's priority.
 
@@ -40,4 +40,4 @@ A **client** GUI application that receives audio streams, displays a GUI for pla
 ---
 
 ## How It Works
-The AudioCast Server continuously monitors a specified folder for `.rfa` files. When a new `.rfa` file is created, the server matches it to the corresponding audio files based on the naming conventions (including priority). The audio files are then streamed to connected clients. Clients receive and play the audio based on the priority and other relevant conditions.
+The RFAStream Server continuously monitors a specified folder for `.rfa` files. When a new `.rfa` file is created, the server matches it to the corresponding audio files based on the naming conventions (including priority). The audio files are then streamed to connected clients. Clients receive and play the audio based on the priority and other relevant conditions.

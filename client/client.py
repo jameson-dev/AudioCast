@@ -13,7 +13,7 @@ from pystray import Icon, MenuItem, Menu
 from PIL import Image, ImageDraw
 
 
-parser = argparse.ArgumentParser(description="AudioCast Streaming Client")
+parser = argparse.ArgumentParser(description="RFAStream Client")
 parser.add_argument("--host", default='127.0.0.1', help="Server Hostname (Default: 127.0.0.1)")
 parser.add_argument("--port", type=int, default=12345, help="Server Port (Default: 12345)")
 parser.add_argument("--retry", type=int, default=5, help="Reconnect delay in seconds (Default: 5 seconds)")
@@ -62,7 +62,7 @@ def load_config(config_path='client-config.json'):
         return default_config
 
 
-class AudioCastClient:
+class RFAStreamClient:
     def __init__(self, host, port, retry_delay, heartbeat_enabled):
         self.host = host
         self.port = port
@@ -236,21 +236,21 @@ class AudioCastClient:
             root.deiconify()
 
         # Create tray icon
-        icon_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'audiocast.ico')
+        icon_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'rfastream.ico')
         icon_image = Image.open(icon_path)
 
         menu = Menu(MenuItem('Open', open_gui), MenuItem('Quit', on_quit))
 
-        tray_icon = Icon("AudioCast Client", icon_image, "AudioCast", menu)
+        tray_icon = Icon("RFAStream Client", icon_image, "RFAStream", menu)
 
         return tray_icon
 
     def create_gui(self):
         root = Tk()
-        root.title("AudioCast Client")
+        root.title("RFAStream Client")
         root.resizable(False, False)
 
-        root.iconbitmap("..\\assets\\audiocast.ico")
+        root.iconbitmap("..\\assets\\rfastream.ico")
 
         # Calculate the position for the bottom-right corner
         screen_width = root.winfo_screenwidth()
@@ -269,7 +269,7 @@ class AudioCastClient:
         self.broadcast_status = StringVar()
         self.broadcast_status.set("Finding Broadcast Status...")
 
-        title_label = Label(root, text="AudioCast Client", font=("Arial", 16))
+        title_label = Label(root, text="RFAStream Client", font=("Arial", 16))
         title_label.pack(pady=(5, 0))
 
         status_label = Label(root, textvariable=self.connection_status, font=("Arial", 12), fg="green")
@@ -407,7 +407,7 @@ def main():
     reconnect_delay = config['reconnect_delay']
     heartbeat_enabled = config['heartbeat_enabled']
 
-    client = AudioCastClient(host, port, reconnect_delay, heartbeat_enabled)
+    client = RFAStreamClient(host, port, reconnect_delay, heartbeat_enabled)
     client.run()
 
 
