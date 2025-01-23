@@ -1,17 +1,17 @@
 [Setup]
-AppName=AudioCast
-AppVerName=AudioCast
+AppName=RFAStream
+AppVerName=RFAStream
 AppPublisher=Jameson Bell
 AppVersion=1.0
-DefaultDirName={pf}\AudioCast
-DefaultGroupName=AudioCast
+DefaultDirName={pf}\RFAStream
+DefaultGroupName=RFAStream
 OutputDir=Output
-OutputBaseFilename=AudioCast_Installer
+OutputBaseFilename=RFA_Stream_Installer
 Compression=lzma
 SolidCompression=yes
 Uninstallable=yes
-SetupIconFile=assets\audiocast.ico
-UninstallDisplayIcon=assets\audiocast.ico
+SetupIconFile=assets\rfastream.ico
+UninstallDisplayIcon=assets\rfastream.ico
 
 [Types]
 Name: "full"; Description: "Install both Client and Server"
@@ -30,15 +30,15 @@ Source: "dist\client\client.exe"; DestDir: "{app}\client"; Flags: recursesubdirs
 Source: "dist\server\server.exe"; DestDir: "{app}\server"; Flags: recursesubdirs createallsubdirs ignoreversion; Components: server
 
 ; Include shared assets
-Source: "assets\audiocast.ico"; DestDir: "{app}\assets"; Flags: ignoreversion
+Source: "assets\rfastream.ico"; DestDir: "{app}\assets"; Flags: ignoreversion
 
 [Icons]
 ; Shortcut for client
-Name: "{group}\AudioCast Client"; Filename: "{app}\client\client.exe"; IconFilename: "{app}\assets\audiocast.ico"; Components: client
+Name: "{group}\RFAStream Client"; Filename: "{app}\client\client.exe"; IconFilename: "{app}\assets\rfastream.ico"; Components: client
 
 ; Shortcut for server
-Name: "{group}\AudioCast Server"; Filename: "{app}\server\server.exe"; IconFilename: "{app}\assets\audiocast.ico"; Components: server
+Name: "{group}\RFAStream Server"; Filename: "{app}\server\server.exe"; IconFilename: "{app}\assets\rfastream.ico"; Components: server
 
 [Registry]
 ; Add client to startup only if client is installed
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "AudioCast"; ValueData: "{app}\client\client.exe"; Flags: uninsdeletevalue; Components: client
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "RFAStream"; ValueData: "{app}\client\client.exe"; Flags: uninsdeletevalue; Components: client
