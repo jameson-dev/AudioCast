@@ -32,6 +32,9 @@ Source: "dist\server\server.exe"; DestDir: "{app}\server"; Flags: recursesubdirs
 ; Include shared assets
 Source: "assets\rfastream.ico"; DestDir: "{app}\assets"; Flags: ignoreversion
 
+; Add client-config.json to AppData folder
+Source: "client-config.json"; DestDir: "{userappdata}\RFAStream"; Flags: ignoreversion
+
 [Icons]
 ; Shortcut for client
 Name: "{group}\RFAStream Client"; Filename: "{app}\client\client.exe"; IconFilename: "{app}\assets\rfastream.ico"; Components: client
@@ -39,8 +42,12 @@ Name: "{group}\RFAStream Client"; Filename: "{app}\client\client.exe"; IconFilen
 ; Shortcut for server
 Name: "{group}\RFAStream Server"; Filename: "{app}\server\server.exe"; IconFilename: "{app}\assets\rfastream.ico"; Components: server
 
+; Create a shortcut for the client-config.json in the installation folder
+Name: "{app}\client-config.json"; Filename: "{userappdata}\RFAStream\client-config.json"; WorkingDir: "{app}"; IconFilename: "{app}\assets\rfastream.ico"
+
 [Registry]
 ; Add client to startup only if client is installed
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "RFAStream"; ValueData: "{app}\client\client.exe"; Flags: uninsdeletevalue; Components: client
+
 ; Add icon to Uninstall
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\YourApp"; ValueType: string; ValueName: "DisplayIcon"; ValueData: "{app}\assets\rfastream.ico"
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\RFAStream"; ValueType: string; ValueName: "DisplayIcon"; ValueData: "{app}\assets\rfastream.ico"
