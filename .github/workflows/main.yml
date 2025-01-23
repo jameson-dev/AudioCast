@@ -51,18 +51,18 @@ jobs:
       - name: Upload Client EXE as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AudioCast-Client
+          name: RFAStream-Client
           path: dist/client/client.exe  # Path to client EXE
 
       # Step 9: Upload Server EXE as Artifact
       - name: Upload Server EXE as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AudioCast-Server
+          name: RFAStream-Server
           path: dist/server/server.exe  # Path to server EXE
       # Step 10: Upload Installer as Artifact
       - name: Upload Installer as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AudioCast-Installer
+          name: RFAStream-Installer
           path: Output/AudioCast_Installer.exe  # Path to the generated installer
