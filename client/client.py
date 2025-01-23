@@ -10,7 +10,7 @@ import json
 from loguru import logger
 from tkinter import Tk, Button, Label, StringVar
 from pystray import Icon, MenuItem, Menu
-from PIL import Image, ImageDraw
+from PIL import Image
 
 
 parser = argparse.ArgumentParser(description="RFAStream Client")

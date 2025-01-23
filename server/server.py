@@ -132,8 +132,6 @@ class FileHandler(FileSystemEventHandler):
             # Send the incident type audio file
             self.stream_audio(audio_file_path)
 
-
-
             logger.info("Both audio files streamed successfully.")
         except FileNotFoundError as e:
             logger.error("Error streaming audio: {e}")

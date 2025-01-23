@@ -2,6 +2,7 @@ import subprocess
 import sys
 import os
 
+
 def create_exe(script_name):
     print(f"Running PyInstaller for {script_name}")
 
