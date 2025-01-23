@@ -65,4 +65,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: RFAStream-Installer
-          path: Output/AudioCast_Installer.exe  # Path to the generated installer
+          path: Output/RFAStream_Installer.exe  # Path to the generated installer
