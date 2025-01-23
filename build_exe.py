@@ -15,9 +15,9 @@ def create_exe(script_name):
 
     # Define the PyInstaller command
     if "server.py" in script_name:
-        command = f'pyinstaller --onefile --add-data "assets/rfastream.ico;assets" --distpath dist\\server --icon=assets/rfastream.ico {script_path}'
+        command = f'pyinstaller --onefile --add-data "assets\\rfastream.ico;assets" --distpath dist\\server --icon=assets\\rfastream.ico {script_path}'
     elif "client.py" in script_name:
-        command = f'pyinstaller --onefile --add-data "assets/rfastream.ico;assets" --distpath dist\\client --icon=assets/rfastream.ico --windowed {script_path}'
+        command = f'pyinstaller --onefile --add-data "assets\\rfastream.ico;assets" --distpath dist\\client --icon=assets\\rfastream.ico --windowed {script_path}'
     else:
         print("Invalid script name. Use client.py or server.py.")
         sys.exit(1)
