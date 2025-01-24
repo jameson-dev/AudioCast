@@ -16,7 +16,11 @@ def create_tray_icon(self, root):
 
     # Create tray icon
     install_dir = os.path.dirname(os.path.realpath(__file__))
-    icon_path = os.path.join(install_dir, 'assets', 'rfastream.ico')
+    if os.path.exists(os.path.join(install_dir, 'assets', 'rfastream.ico')):
+        icon_path = os.path.join(install_dir, 'assets', 'rfastream.ico')
+    else:
+        icon_path = os.path.join('..\\assets\\rfastream.ico')
+
     icon_image = Image.open(icon_path)
 
     menu = Menu(MenuItem('Open', open_gui), MenuItem('Quit', on_quit))
