@@ -6,4 +6,4 @@ AudioCast-server.spec
 /dist
 *.rfa
 /server/__pycache__
-/client/__pychache__
+/client/__pycache__
