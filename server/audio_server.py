@@ -32,6 +32,10 @@ class AudioServer:
         # Initialize thread pool
         self.executor = ThreadPoolExecutor(max_workers=max_workers)
 
+        # Heartbeat thread
+        self.heartbeat_thread = threading.Thread(target=self.start_heartbeat, daemon=True)
+        self.heartbeat_thread.start()
+
     def handle_client(self, client_socket, client_address):
         logger.info(f"New client connected: {client_address}")
         self.clients.append(client_socket)

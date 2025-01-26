@@ -82,6 +82,8 @@ class RFAStreamClient:
                     # Send PAUSE command to server
                     self.client_socket.sendall(b"PAUSE")
                     self.paused_event.set()
+                    self.broadcast_status.set("Broadcast Paused")
+                    logger.info("Broadcast paused. All clients paused.")
                     self.pause_button.config(text="Resume broadcast")
             except Exception as e:
                 logger.error(f"Error sending pause/resume command: {e}")
@@ -101,7 +103,7 @@ class RFAStreamClient:
         self.connect()
 
         # Start the audio streaming in separate thread
-        audio_thread = threading.Thread(target=stream_audio, args=(self, self.connection_status, self.broadcast_status, self.reconnect_delay, self.is_muted), daemon=True)
+        audio_thread = threading.Thread(target=stream_audio, args=(self, self.connection_status, self.broadcast_status, self.reconnect_delay, self.is_muted, self.client_socket), daemon=True)
         audio_thread.start()
 
         # Start tray icon in separate thread

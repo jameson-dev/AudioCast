@@ -18,7 +18,7 @@ shutdown_event = threading.Event()
 p = pyaudio.PyAudio()
 
 
-def stream_audio(client, connection_status, broadcast_status, reconnect_delay, is_muted):
+def stream_audio(client, connection_status, broadcast_status, reconnect_delay, is_muted, client_socket):
     logger.debug("stream_audio called")
     stream = p.open(format=FORMAT,
                     channels=CHANNELS,
@@ -26,10 +26,8 @@ def stream_audio(client, connection_status, broadcast_status, reconnect_delay, i
                     output=True,
                     frames_per_buffer=CHUNK_SIZE)
 
-    client_socket = None
-
     while not shutdown_event.is_set():
-        if not client_socket:
+        if not client_socket or client_socket.fileno() == -1:  # Check if socket is invalid or closed
             try:
                 logger.debug("No active socket, attempting to reconnect.")
                 client_socket = connect_to_server(client.host, client.port, client.reconnect_delay, client.shutdown_event, client.socket_lock)
@@ -55,6 +53,7 @@ def stream_audio(client, connection_status, broadcast_status, reconnect_delay, i
             except Exception as e:
                 logger.error(f"Failed to connect: {e}")
                 connection_status.set("Disconnected")
+                broadcast_status.set("Not connected")
                 time.sleep(reconnect_delay)
                 continue
 
@@ -66,20 +65,25 @@ def stream_audio(client, connection_status, broadcast_status, reconnect_delay, i
             continue
 
         try:
-            data = client_socket.recv(CHUNK_SIZE)
-            if not data:
-                logger.warning("Server disconnected.")
-                connection_status.set("Disconnected")
-                client_socket.close()
-                client_socket = None
-                continue
+            # Ensure data is only read if the socket is valid
+            if client_socket and client_socket.fileno() != -1:
+                data = client_socket.recv(CHUNK_SIZE)
+                if not data:
+                    logger.warning("Server disconnected.")
+                    connection_status.set("Disconnected")
+                    client_socket.close()
+                    client_socket = None
+                    continue
 
-            if is_muted:
-                # Mute audio by not writing and data to stream
-                continue
+                if is_muted:
+                    # Mute audio by not writing any data to stream
+                    continue
+                else:
+                    stream.write(data)
             else:
-                stream.write(data)
-
+                logger.warning("Invalid socket. Reconnecting...")
+                connection_status.set("Disconnected")
+                time.sleep(reconnect_delay)
         except socket.timeout:
             pass
         except socket.error as e:
@@ -93,9 +97,9 @@ def stream_audio(client, connection_status, broadcast_status, reconnect_delay, i
                 client_socket.close()
             client_socket = None
 
-        # Check if the client_socket is still valid and try reconnecting if not
+        # If client_socket is None, the loop will attempt to reconnect on the next iteration.
         if client_socket is None:
-            logger.debug("Attempting to reconnect to server...")
+            logger.debug("Attempting to reconnect...")
             time.sleep(reconnect_delay)
 
     stream.stop_stream()
