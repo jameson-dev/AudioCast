@@ -1,6 +1,5 @@
 import os
 import sys
-import time
 from pystray import Icon, MenuItem, Menu
 from PIL import Image
 from tkinter import Tk, Button, Label, StringVar
@@ -75,9 +74,6 @@ def create_gui(self):
 
     root.withdraw()
     return root
-
-
-
 
 
 def update_pause_button(self, text):
